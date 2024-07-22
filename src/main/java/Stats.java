@@ -1,6 +1,3 @@
-import java.io.*;
-import java.util.*;
-
 public class Stats {
     // board dimensions in mm (measured from center of board)
     public static final double R1 = 6.35; // distance to double bullseye
