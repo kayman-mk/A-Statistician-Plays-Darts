@@ -2,7 +2,22 @@
   "version": "0.2",
   "language": "en",
   "words": [
+    "antialiasing",
+    "colorchooser",
+    "cpus"
   ],
   "ignoreWords": [
+    "amannn",
+    "argmax",
+    "corres",
+    "dorny",
+    "ence",
+    "ibiqlik",
+    "jmax",
+    "markdownlint",
+    "releaserc",
+    "rhysd",
+    "shunsuke",
+    "temurin"
   ]
 }

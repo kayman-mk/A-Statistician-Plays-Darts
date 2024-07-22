@@ -997,7 +997,6 @@ public class DartsApplet implements MouseMotionListener, ChangeListener {
             }
         };
 
-        // Führe den obigen Quellcode im Event-Dispatch-Thread aus
         SwingUtilities.invokeLater(guiCreator);
     }
 }
