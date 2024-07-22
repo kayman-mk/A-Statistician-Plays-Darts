@@ -8,6 +8,11 @@ import java.awt.image.*;
 import java.util.*;
 import javax.swing.colorchooser.*;
 
+import static java.awt.Component.CENTER_ALIGNMENT;
+import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS;
+import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
+import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
+
 public class DartsApplet implements MouseMotionListener, ChangeListener {
     private JTextArea textArea;
     private JButton createHeatMapButton;
@@ -53,7 +58,7 @@ public class DartsApplet implements MouseMotionListener, ChangeListener {
         textArea = new JTextArea();
         textArea.setLineWrap(true);
         JScrollPane scrollPane = new JScrollPane(textArea);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollPane.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_ALWAYS);
         scrollPane.setPreferredSize(new Dimension(200,300));
         scrollPane.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createTitledBorder("Scores"),
@@ -74,7 +79,7 @@ public class DartsApplet implements MouseMotionListener, ChangeListener {
                 }
             }
         });
-        createHeatMapButton.setAlignmentX(JComponent.CENTER_ALIGNMENT);
+        createHeatMapButton.setAlignmentX(CENTER_ALIGNMENT);
 
         // put it together
         JPanel westPanel = new JPanel();
@@ -97,10 +102,10 @@ public class DartsApplet implements MouseMotionListener, ChangeListener {
         legendPanel.setLayout(new BoxLayout(legendPanel, BoxLayout.Y_AXIS));
         legendLabel = new JLabel();
         legendLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        legendLabel.setAlignmentX(JComponent.CENTER_ALIGNMENT);
+        legendLabel.setAlignmentX(CENTER_ALIGNMENT);
         legendPanel.add(legendLabel);
         JLabel lowHighLabel = new JLabel("Low                 High");
-        lowHighLabel.setAlignmentX(JComponent.CENTER_ALIGNMENT);
+        lowHighLabel.setAlignmentX(CENTER_ALIGNMENT);
         legendPanel.add(lowHighLabel);
 
         // change colors
@@ -543,8 +548,9 @@ public class DartsApplet implements MouseMotionListener, ChangeListener {
         mainPanel.add(okCancelPanel);
         changeColorsFrame.add(mainPanel, BorderLayout.CENTER);
 
-        changeColorsFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        changeColorsFrame.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         changeColorsFrame.addWindowListener(new WindowAdapter() {
+            @Override
             public void windowClosing(WindowEvent e) {
                 closeChangeColorsFrame();
             }
@@ -661,6 +667,7 @@ public class DartsApplet implements MouseMotionListener, ChangeListener {
 
         private BufferedImage bufferedImage;
 
+        @Override
         public void paintComponent(Graphics g) {
             super.paintComponent(g);
 
@@ -698,30 +705,30 @@ public class DartsApplet implements MouseMotionListener, ChangeListener {
             }
         }
 
-        private void createBufferedImage(double[][] E) {
-            if (E == null || E.length == 0) {
+        private void createBufferedImage(double[][] e) {
+            if (e == null || e.length == 0) {
                 bufferedImage = null;
                 return;
             }
 
-            int n = E.length;
+            int n = e.length;
             bufferedImage = new BufferedImage(n, n, BufferedImage.TYPE_INT_RGB);
             Graphics2D g2 = bufferedImage.createGraphics();
 
             // find the min and max values of E
-            double min = E[0][0];
-            double max = E[0][0];
+            double min = e[0][0];
+            double max = e[0][0];
             for (int i=0; i<n; i++) {
                 for (int j=0; j<n; j++) {
-                    if (E[i][j] < min) min = E[i][j];
-                    if (E[i][j] > max) max = E[i][j];
+                    if (e[i][j] < min) min = e[i][j];
+                    if (e[i][j] > max) max = e[i][j];
                 }
             }
 
             // draw the heat map
             for (int i=0; i<n; i++) {
                 for (int j=0; j<n; j++) {
-                    g2.setColor(getHeatColor(E[i][j],min,max));
+                    g2.setColor(getHeatColor(e[i][j],min,max));
                     g2.fillRect(i,n-1-j,1,1);
                 }
             }
@@ -851,7 +858,6 @@ public class DartsApplet implements MouseMotionListener, ChangeListener {
                     s == 27 || s == 28 || s == 30 || s == 32 || s == 33 || s == 34 || s == 36 ||
                     s == 38 || s == 39 || s == 40 || s == 42 || s == 45 || s == 48 || s == 50 ||
                     s == 51 || s == 54 || s == 57 || s == 60) {
-                continue;
             }
             else {
                 if (invalids.size() == 10) {
@@ -881,7 +887,8 @@ public class DartsApplet implements MouseMotionListener, ChangeListener {
 
     private double[][] E;
     private double s1, s2, s3;
-    private int imax, jmax;
+    private int imax;
+    private int jmax;
 
     private class StatsTask extends Thread {
         private int[] scores;
@@ -893,6 +900,7 @@ public class DartsApplet implements MouseMotionListener, ChangeListener {
             }
         }
 
+        @Override
         public void run() {
             enableAll(false);
 
@@ -977,20 +985,11 @@ public class DartsApplet implements MouseMotionListener, ChangeListener {
         progressLabel.setText(progressString);
     }
 
-    public void start() {
-    }
-
-    public void stop() {
-    }
-
-    public void destroy() {
-    }
-
     public static void main(String[] args) {
         Runnable guiCreator = new Runnable() {
             public void run() {
                 JFrame window = new JFrame("A Statistician Plays Darts");
-                window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                window.setDefaultCloseOperation(EXIT_ON_CLOSE);
 
                 new DartsApplet().init(window);
 
