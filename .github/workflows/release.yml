@@ -1,0 +1,40 @@
+---
+name: Release
+
+# yamllint disable-line rule:truthy
+on:
+ push:
+   branches:
+     - main
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        with:
+          fetch-depth: 0
+
+      - name: Setup release
+        run: |
+          # using same ref as in calling workflow
+          git clone https://github.com/Hapag-Lloyd/Workflow-Templates.git .release_clone
+          git checkout ${{ github.action_ref }}
+
+          mv .release_clone/.release_github_only_auto .release
+          mv .release/.releaserc.yml .releaserc.yml
+
+      - name: Setup Node.js
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        with:
+          node-version: "lts/*"
+
+      - name: Install dependencies
+        run: npm --prefix .release/ ci
+
+      - name: Release
+        run: npx --prefix .release/ semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.SEMANTIC_RELEASE_GH_TOKEN }}
