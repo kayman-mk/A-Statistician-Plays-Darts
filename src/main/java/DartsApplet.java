@@ -983,4 +983,6 @@ public class DartsApplet extends JApplet implements MouseMotionListener, ChangeL
 
     public void destroy() {
     }
+
+
 }

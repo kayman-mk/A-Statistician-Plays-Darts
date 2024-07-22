@@ -83,15 +83,49 @@ public class Stats {
     // a: the numerators we computed for each region
     // b: the denominators for each region
     private static double computeExp(int x, double[] a, double[] b) {
-        // CHANGED
-        if (x==25) {
-            return a[1]/b[1];
-        } else if (x==50) {
-            return a[0]/b[0];
-        } else {
+        // return the appropriate expectation, based on how the score can be achieved
+        if (x==1 || x==5 || x==7 || x==11 || x==13 || x==17 || x==19) {
+            // these numbers can only be achieved by hitting a single
             return a[2]/b[2];
         }
+        else if (x==2 || x==4 || x==8 || x==10 || x==14 || x==16 || x==20) {
+            // single or double
+            return (a[2]+a[3])/(b[2]+b[3]);
+        }
+        else if (x==3 || x==9 || x==15) {
+            // single or triple region
+            return (a[2]+a[4])/(b[2]+b[4]);
+        }
 
+        else if (x==6 || x==12 || x==18) {
+            // single, double, or triple
+            return (a[2]+a[3]+a[4])/(b[2]+b[3]+b[4]);
+        }
+        else if (x==24 || x==30 || x==36) {
+            // double or triple
+            return (a[3]+a[4])/(b[3]+b[4]);
+        }
+        else if (x==22 || x==26 || x==28 || x==32 || x==34 || x==38 || x==40) {
+            // double only
+            return a[3]/b[3];
+        }
+        else if (x==21 || x==27 || x==33 || x==39 || x==42 || x==45 || x==48 ||
+                x==51 || x==54 || x==57 || x==60) {
+            // triple only
+            return a[4]/b[4];
+        }
+        else if (x==25) {
+            // single bullseye
+            return a[1]/b[1];
+        }
+        else if (x==50) {
+            // double bullseye
+            return a[0]/b[0];
+        }
+        else {
+            // outside the board
+            return a[5]/b[5];
+        }
     }
 
     // Parameters
