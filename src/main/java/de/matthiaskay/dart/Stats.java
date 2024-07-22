@@ -518,10 +518,6 @@ public class Stats {
             }
         }
 
-        // help the gc out
-        big_s=null; g1=null; g2=null; g1f=null; g2f=null;
-        A=null; AA=null; AAA=null;
-
         return E;
     }
 
@@ -744,20 +740,14 @@ public class Stats {
     public static void four1(double[] data, int nn, int isign) {
         int n,mmax,m,j,istep,i;
         double wtemp,wr,wpr,wpi,wi,theta;
-        double temp,tempr,tempi;
+        double tempr,tempi;
 
         n=nn << 1;
         j=1;
         for (i=1;i<n;i+=2) {
             if (j > i) {
-                // SWAP(data[j],data[i]);
-                temp=data[j];
-                data[j]=data[i];
-                data[i]=temp;
-                // SWAP(data[j+1],data[i+1]);
-                temp=data[j+1];
-                data[j+1]=data[i+1];
-                data[i+1]=temp;
+                swap(data, j, i);
+                swap(data, j+1, i+1);
             }
             m=n >>> 1;
             while (m >= 2 && j > m) {
@@ -785,11 +775,19 @@ public class Stats {
                     data[i] += tempr;
                     data[i+1] += tempi;
                 }
-                wr=(wtemp=wr)*wpr-wi*wpi+wr;
+                wtemp=wr;
+                wr=wr*wpr-wi*wpi+wr;
                 wi=wi*wpr+wtemp*wpi+wi;
             }
             mmax=istep;
         }
+    }
+
+    private static void swap(double[] data, int j, int i) {
+        double temp;
+        temp= data[j];
+        data[j]= data[i];
+        data[i]=temp;
     }
 
     // four1 applied to the kth row of data (a matrix)
@@ -802,14 +800,8 @@ public class Stats {
         j=1;
         for (i=1;i<n;i+=2) {
             if (j > i) {
-                // SWAP(data[k][j],data[k][i]);
-                temp=data[k][j];
-                data[k][j]=data[k][i];
-                data[k][i]=temp;
-                // SWAP(data[k][j+1],data[k][i+1]);
-                temp=data[k][j+1];
-                data[k][j+1]=data[k][i+1];
-                data[k][i+1]=temp;
+                swap(data[k], j, i);
+                swap(data[k], j+1, i+1);
             }
             m=n >>> 1;
             while (m >= 2 && j > m) {
@@ -837,7 +829,8 @@ public class Stats {
                     data[k][i] += tempr;
                     data[k][i+1] += tempi;
                 }
-                wr=(wtemp=wr)*wpr-wi*wpi+wr;
+                wtemp=wr;
+                wr=wr*wpr-wi*wpi+wr;
                 wi=wi*wpr+wtemp*wpi+wi;
             }
             mmax=istep;
@@ -902,8 +895,14 @@ public class Stats {
     // transforms of the respective data arrays. n MUST be an integer power of 2.
     private static void twofft(double[] data1, double[] data2,
                                double[] fft1, double[] fft2, int n) {
-        int nn3,nn2,jj,j;
-        double rep,rem,aip,aim;
+        int nn3;
+        int nn2;
+        int jj;
+        int j;
+        double rep;
+        double rem;
+        double aip;
+        double aim;
 
         nn3=1+(nn2=2+n+n);
         for (j=1,jj=2;j<=n;j++,jj+=2) {
@@ -1285,21 +1284,21 @@ public class Stats {
         da.updateProgress(50+6/7*50);
 
         // switch around some rows and some columns, take the real part
-        double[][] EE = new double[2*m+1][2*m+1];
+        double[][] ee = new double[2*m+1][2*m+1];
         for (int i=1; i<=m; i++) {
             for (int j=1; j<=m; j++) {
-                EE[i+m][j+m] = S[i][2*j-1]/(4*m*m);
+                ee[i+m][j+m] = S[i][2*j-1]/(4*m*m);
             }
             for (int j=m+1; j<=2*m; j++) {
-                EE[i+m][j-m] = S[i][2*j-1]/(4*m*m);
+                ee[i+m][j-m] = S[i][2*j-1]/(4*m*m);
             }
         }
         for (int i=m+1; i<=2*m; i++) {
             for (int j=1; j<=m; j++) {
-                EE[i-m][j+m] = S[i][2*j-1]/(4*m*m);
+                ee[i-m][j+m] = S[i][2*j-1]/(4*m*m);
             }
             for (int j=m+1; j<=2*m; j++) {
-                EE[i-m][j-m] = S[i][2*j-1]/(4*m*m);
+                ee[i-m][j-m] = S[i][2*j-1]/(4*m*m);
             }
         }
 
@@ -1307,13 +1306,13 @@ public class Stats {
         double[][] E = new double[n][n];
         for (int i=m-n1; i<=m+n2-1; i++) {
             for (int j=m-n1; j<=m+n2-1; j++) {
-                E[i-m+n1][j-m+n1] = EE[i][j];
+                E[i-m+n1][j-m+n1] = ee[i][j];
             }
         }
         da.updateProgress(100);
 
         // help the gc out
-        S=null; G=null; EE=null;
+        S=null; G=null; ee=null;
 
         return E;
     }
