@@ -984,7 +984,10 @@ public class Stats {
     private static void twofftcol(double[][] data, int k1, int k2,
                                   double[][] fft, int n) {
         int nn3,nn2,jj,j;
-        double rep,rem,aip,aim;
+        double rep;
+        double rem;
+        double aip;
+        double aim;
 
         nn2=2+n+n;
         nn3=1+nn2;
@@ -1156,7 +1159,8 @@ public class Stats {
         da.updateProgress(50+4/11*50);
 
         // multiply every row of A by g2f
-        double re,im;
+        double re;
+        double im;
         for (int i=1; i<=2*m; i+=1) {
             for (int j=1; j<=4*m-1; j+=2) {
                 re = A[i][j]*g2f[j] - A[i][j+1]*g2f[j+1];
@@ -1289,7 +1293,8 @@ public class Stats {
         da.updateProgress(50+4/7*50);
 
         // multiply S and G together (store the result in S)
-        double re,im;
+        double re;
+        double im;
         for (int i=1; i<=2*m; i+=1) {
             for (int j=1; j<=4*m-1; j+=2) {
                 re = S[i][j]*G[i][j] - S[i][j+1]*G[i][j+1];
