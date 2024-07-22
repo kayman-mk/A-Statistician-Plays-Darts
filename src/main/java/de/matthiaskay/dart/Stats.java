@@ -160,30 +160,33 @@ public class Stats {
     //
 
     // number of importance samples
-    private static final int numImpSamples = 1000;
+    private static final int NUM_IMP_SAMPLES = 1000;
 
     // random number generator for importance samplce
     private static java.util.Random rand = new java.util.Random(0);
 
     // board areas used for importance sampling
-    private static final double ar1 = Math.PI*R1*R1;              // double bullseye
-    private static final double ar2 = Math.PI*(R2*R2 - R1*R1);    // single bullseye
-    private static final double ar3 = Math.PI*(R3*R3 - R2*R2)/20; // lower single
-    private static final double ar4 = Math.PI*(R5*R5 - R4*R4)/20; // upper single
-    private static final double ar5 = Math.PI*(R*R - R5*R5)/20;   // double
-    private static final double ar6 = Math.PI*(R4*R4 - R3*R3)/20; // triple
+    private static final double AR_1 = Math.PI*R1*R1;              // double bullseye
+    private static final double AR_2 = Math.PI*(R2*R2 - R1*R1);    // single bullseye
+    private static final double AR_3 = Math.PI*(R3*R3 - R2*R2)/20; // lower single
+    private static final double AR_4 = Math.PI*(R5*R5 - R4*R4)/20; // upper single
+    private static final double AR_5 = Math.PI*(R*R - R5*R5)/20;   // double
+    private static final double AR_6 = Math.PI*(R4*R4 - R3*R3)/20; // triple
 
     public static double[] generalEM(int[] scores) {
         return generalEM(scores,100,100,0,150);
     }
 
-    // Parameters
-    // scores: scores array
-    // s1Init, s2Init, s3Init: initial values for s1 (x variance),
-    // s2 (y variance), and s3 (correlation)
-    // numIter: number of steps to run the EM algorithm
-    //
-    // Returns an array of the estimates: {s1, s2, s3}
+    /**
+     *
+     * @param scores scores array
+     * @param s1Init initial values for s1 (x variance)
+     * @param s2Init initial values for s2 (y variance)
+     * @param s3Init initial values for s3 (correlation)
+     * @param numIter number of steps to run the EM algorithm
+     *
+     * @return an array of the estimates: {s1, s2, s3}
+     */
     public static double[] generalEM(int[] scores, double s1Init, double s2Init,
                                      double s3Init, int numIter) {
         double s1 = s1Init;
@@ -193,36 +196,40 @@ public class Stats {
         rand.setSeed(0);
 
         for (int i=0; i<numIter; i++) {
-            double[] A = generalStep(scores, s1, s2, s3);
-            s1 = A[0];
-            s2 = A[1];
-            s3 = A[2];
+            double[] a = generalStep(scores, s1, s2, s3);
+            s1 = a[0];
+            s2 = a[1];
+            s3 = a[2];
         }
 
         return new double[] {s1, s2, s3};
     }
 
-    // Parameters
-    // scores: scores array
-    // s1, s2, s3: current estimate of covariance matrix
-    //
-    // Returns an array of updated estimates {s1, s2, s3}
+    /**
+     *
+     * @param scores scores array
+     * @param s1 current estimate of covariance matrix
+     * @param s2 current estimate of covariance matrix
+     * @param s3 current estimate of covariance matrix
+     *
+     * @return an array of updated estimates {s1, s2, s3}
+     */
     public static double[] generalStep(int[] scores, double s1, double s2, double s3) {
 
         int n = scores.length;
-        double[] A = new double[3];
-        A[0] = 0;
-        A[1] = 0;
-        A[2] = 0;
+        double[] a = new double[3];
+        a[0] = 0;
+        a[1] = 0;
+        a[2] = 0;
 
         for (int i=0; i<n; i++) {
-            double[] B = simulateExp(scores[i], s1, s2, s3);
-            A[0] += B[0];
-            A[1] += B[1];
-            A[2] += B[2];
+            double[] b = simulateExp(scores[i], s1, s2, s3);
+            a[0] += b[0];
+            a[1] += b[1];
+            a[2] += b[2];
         }
 
-        return new double[] {A[0]/n, A[1]/n, A[2]/n};
+        return new double[] {a[0]/n, a[1]/n, a[2]/n};
     }
 
     // Parameters
@@ -230,26 +237,26 @@ public class Stats {
     // s1, s2, s3: current estimate of covariance
     private static double[] simulateExp(int x, double s1, double s2, double s3) {
         double det = s1*s2 - s3*s3;
-        double[] A = new double[3];
-        A[0] = 0;
-        A[1] = 0;
-        A[2] = 0;
-        double W = 0;
+        double[] a = new double[3];
+        a[0] = 0;
+        a[1] = 0;
+        a[2] = 0;
+        double big_w = 0;
 
-        for (int i=0; i<numImpSamples; i++) {
+        for (int i = 0; i< NUM_IMP_SAMPLES; i++) {
             double[] z = randomPt(x);
             double w = Math.exp(-(s2*z[0]*z[0] - 2*s3*z[0]*z[1] +
                     s1*z[1]*z[1])/(2*det));
-            A[0] += w*z[0]*z[0];
-            A[1] += w*z[1]*z[1];
-            A[2] += w*z[0]*z[1];
-            W += w;
+            a[0] += w*z[0]*z[0];
+            a[1] += w*z[1]*z[1];
+            a[2] += w*z[0]*z[1];
+            big_w += w;
         }
 
-        A[0] /= W;
-        A[1] /= W;
-        A[2] /= W;
-        return A;
+        a[0] /= big_w;
+        a[1] /= big_w;
+        a[2] /= big_w;
+        return a;
     }
 
     // Parameters
@@ -259,7 +266,7 @@ public class Stats {
 
         if (x==1 || x==5 || x==7 || x==11 || x==13 || x==17 || x==19) {
             // single only
-            if (u <= ar3/(ar3+ar4)) {
+            if (u <= AR_3 /(AR_3 + AR_4)) {
                 return randomSlicePt(x,R2,R3);
             }
             else {
@@ -269,10 +276,10 @@ public class Stats {
 
         else if (x==2 || x==4 || x==8 || x==10 || x==14 || x==16 || x==20) {
             // single or double
-            if (u <= ar5/(ar5+ar3+ar4)) {
+            if (u <= AR_5 /(AR_5 + AR_3 + AR_4)) {
                 return randomSlicePt(x/2,R5,R);
             }
-            else if (u <= (ar5+ar3)/(ar5+ar3+ar4)) {
+            else if (u <= (AR_5 + AR_3)/(AR_5 + AR_3 + AR_4)) {
                 return randomSlicePt(x,R2,R3);
             }
             else {
@@ -282,10 +289,10 @@ public class Stats {
 
         else if (x==3 || x==9 || x==15) {
             // single or triple
-            if (u <= ar6/(ar6+ar3+ar4)) {
+            if (u <= AR_6 /(AR_6 + AR_3 + AR_4)) {
                 return randomSlicePt(x/3,R3,R4);
             }
-            else if (u <= (ar6+ar3)/(ar6+ar3+ar4)) {
+            else if (u <= (AR_6 + AR_3)/(AR_6 + AR_3 + AR_4)) {
                 return randomSlicePt(x,R2,R3);
             }
             else {
@@ -295,15 +302,15 @@ public class Stats {
 
         else if (x==6 || x==12 || x==18) {
             // single, double, or triple
-            if (u <= ar6/(ar6+ar5+ar3+ar4)) {
+            if (u <= AR_6 /(AR_6 + AR_5 + AR_3 + AR_4)) {
                 return randomSlicePt(x/3,R3,R4);
             }
-            else if (u <= (ar6+ar5)/
-                    (ar6+ar5+ar3+ar4)) {
+            else if (u <= (AR_6 + AR_5)/
+                    (AR_6 + AR_5 + AR_3 + AR_4)) {
                 return randomSlicePt(x/2,R5,R);
             }
-            else if (u <= (ar6+ar5+ar3)/
-                    (ar6+ar5+ar3+ar4)) {
+            else if (u <= (AR_6 + AR_5 + AR_3)/
+                    (AR_6 + AR_5 + AR_3 + AR_4)) {
                 return randomSlicePt(x,R2,R3);
             }
             else {
@@ -313,7 +320,7 @@ public class Stats {
 
         else if (x==24 || x==30 || x==36) {
             // double or triple
-            if (u <= ar6/(ar6+ar5)) {
+            if (u <= AR_6 /(AR_6 + AR_5)) {
                 return randomSlicePt(x/3,R3,R4);
             }
             else {
@@ -408,10 +415,10 @@ public class Stats {
         double c = 2*R/n;
 
         // build the scores array
-        double[][] S = new double[2*m+1][2*m+1];
+        double[][] big_s = new double[2*m+1][2*m+1];
         for (int i=1; i<=2*m; i++) {
             for (int j=1; j<=2*m; j++) {
-                S[i][j] = score((i-m)*c,(j-m)*c);
+                big_s[i][j] = score((i-m)*c,(j-m)*c);
             }
         }
 
@@ -424,7 +431,7 @@ public class Stats {
             double[][] E = new double[n][n];
             for (int i=m-n1+1; i<=m+n2; i++) {
                 for (int j=m-n1+1; j<=m+n2; j++) {
-                    E[i-m+n1-1][j-m+n1-1] = S[i][j];
+                    E[i-m+n1-1][j-m+n1-1] = big_s[i][j];
                 }
             }
             return E;
@@ -446,7 +453,7 @@ public class Stats {
         // compute the FT of each row of S
         double[][] A = new double[2*m+1][4*m+1];
         for (int i=1; i<=2*m-1; i+=2) {
-            twofftrow(S,i,i+1,A,2*m);
+            twofftrow(big_s,i,i+1,A,2*m);
         }
 
         // multiply every row of A by g2f
@@ -512,7 +519,7 @@ public class Stats {
         }
 
         // help the gc out
-        S=null; g1=null; g2=null; g1f=null; g2f=null;
+        big_s=null; g1=null; g2=null; g1f=null; g2f=null;
         A=null; AA=null; AAA=null;
 
         return E;
@@ -726,11 +733,14 @@ public class Stats {
     /////////////////////////////////////////////////////////////
     //
 
-    // Replaces data[1..2*nn] by its discrete Fourier transform, if isign is input as 1;
-    // or replaces data[1..2*nn] by nn times its inverse discrete Fourier transform, if
-    // isign is input as -1.
-    // data is a complex array of length nn or, equivalently, a real array of length 2*nn.
-    // nn MUST be an integer power of 2 (this is not checked for!).
+    /**
+     * Replaces data[1..2*nn] by its discrete Fourier transform, if isign is input as 1;
+     * or replaces data[1..2*nn] by nn times its inverse discrete Fourier transform, if
+     * isign is input as -1.
+     *
+     * @param data is a complex array of length nn or, equivalently, a real array of length 2*nn
+     * @param nn MUST be an integer power of 2 (this is not checked for!).
+     */
     public static void four1(double[] data, int nn, int isign) {
         int n,mmax,m,j,istep,i;
         double wtemp,wr,wpr,wpi,wi,theta;
