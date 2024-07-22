@@ -106,6 +106,17 @@ jobs:
           file_or_dir: ${{ needs.find-changes-for-shell-output.outputs.yaml_files }}
           strict: true
 
+  lint-json:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    if: needs.find-changes.outputs.json == 'true'
+    needs: find-changes
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Run JSON Lint
+        run: bash <(curl -s https://raw.githubusercontent.com/CICDToolbox/json-lint/master/pipeline.sh)
+
   lint-renovate:
     runs-on: ubuntu-latest
     continue-on-error: true

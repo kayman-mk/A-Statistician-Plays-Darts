@@ -983,7 +983,7 @@ public class DartsApplet implements MouseMotionListener, ChangeListener {
 
     public void destroy() {
     }
-    
+
     public static void main(String[] args) {
         Runnable guiCreator = new Runnable() {
             public void run() {
