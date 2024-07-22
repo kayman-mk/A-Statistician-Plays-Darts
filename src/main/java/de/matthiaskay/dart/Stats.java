@@ -1,6 +1,8 @@
 package de.matthiaskay.dart;
 
 public class Stats {
+    private Stats() {}
+
     // board dimensions in mm (measured from center of board)
     public static final double R1 = 6.35; // distance to double bullseye
     public static final double R2 = 15.9; // distance to single bullseye
@@ -10,10 +12,10 @@ public class Stats {
     public static final double R = 170;   // distance to outside double ring
 
     // ordering of the numbers
-    public static final int[] d = new int[] {20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5};
+    protected static final int[] d = new int[] {20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5};
 
     // index ordering of the numbers (unit-based)
-    public static final int[] ii = new int[] {2,9,11,4,20,6,13,15,18,7,16,19,5,17,8,14,10,3,12,1};
+    protected static final int[] ii = new int[] {2,9,11,4,20,6,13,15,18,7,16,19,5,17,8,14,10,3,12,1};
 
     //
     /////////////////////////////////////////////////////////////
@@ -457,7 +459,8 @@ public class Stats {
         }
 
         // multiply every row of A by g2f
-        double re,im;
+        double re;
+        double im;
         for (int i=1; i<=2*m; i+=1) {
             for (int j=1; j<=4*m-1; j+=2) {
                 re = A[i][j]*g2f[j] - A[i][j+1]*g2f[j+1];
@@ -584,7 +587,8 @@ public class Stats {
         four2(G,2*m,1);
 
         // multiply S and G together (store the result in S)
-        double re,im;
+        double re;
+        double im;
         for (int i=1; i<=2*m; i+=1) {
             for (int j=1; j<=4*m-1; j+=2) {
                 re = S[i][j]*G[i][j] - S[i][j+1]*G[i][j+1];
@@ -707,7 +711,8 @@ public class Stats {
 
     public static double[] getMaxAndArgmax(double[][] data) {
         double max = data[0][0];
-        int ii=0, jj=0;
+        int ii=0;
+        int jj=0;
 
         for (int i=0; i<data.length; i++) {
             for (int j=0; j<data[0].length; j++) {
@@ -738,9 +743,20 @@ public class Stats {
      * @param nn MUST be an integer power of 2 (this is not checked for!).
      */
     public static void four1(double[] data, int nn, int isign) {
-        int n,mmax,m,j,istep,i;
-        double wtemp,wr,wpr,wpi,wi,theta;
-        double tempr,tempi;
+        int n;
+        int mmax;
+        int m;
+        int j;
+        int istep;
+        int i;
+        double wtemp;
+        double wr;
+        double wpr;
+        double wpi;
+        double wi;
+        double theta;
+        double tempr;
+        double tempi;
 
         n=nn << 1;
         j=1;
@@ -847,14 +863,8 @@ public class Stats {
         j=1;
         for (i=1;i<n;i+=2) {
             if (j > i) {
-                // SWAP(data[j][k],data[i][k]);
-                temp=data[j][k];
-                data[j][k]=data[i][k];
-                data[i][k]=temp;
-                // SWAP(data[j+1][k],data[i+1][k]);
-                temp=data[j+1][k];
-                data[j+1][k]=data[i+1][k];
-                data[i+1][k]=temp;
+                swap(data, k, j, i);
+                swap(data, k, j+1, i+1);
             }
             m=n >>> 1;
             while (m >= 2 && j > m) {
@@ -882,11 +892,19 @@ public class Stats {
                     data[i][k] += tempr;
                     data[i+1][k] += tempi;
                 }
-                wr=(wtemp=wr)*wpr-wi*wpi+wr;
+                wtemp=wr;
+                wr=wr*wpr-wi*wpi+wr;
                 wi=wi*wpr+wtemp*wpi+wi;
             }
             mmax=istep;
         }
+    }
+
+    private static void swap(double[][] data, int k, int j, int i) {
+        double temp;
+        temp= data[j][k];
+        data[j][k]= data[i][k];
+        data[i][k]=temp;
     }
 
     // Given two real input arrays data1[1..n] and data2[1..n], this routine calls four1
@@ -904,7 +922,8 @@ public class Stats {
         double aip;
         double aim;
 
-        nn3=1+(nn2=2+n+n);
+        nn2=2+n+n;
+        nn3=1+nn2;
         for (j=1,jj=2;j<=n;j++,jj+=2) {
             fft1[jj-1]=data1[j];
             fft1[jj]=data2[j];
@@ -935,7 +954,8 @@ public class Stats {
         int nn3,nn2,jj,j;
         double rep,rem,aip,aim;
 
-        nn3=1+(nn2=2+n+n);
+        nn2=2+n+n;
+        nn3=1+nn2;
         for (j=1,jj=2;j<=n;j++,jj+=2) {
             fft[k1][jj-1]=data[k1][j];
             fft[k1][jj]=data[k2][j];
@@ -966,7 +986,8 @@ public class Stats {
         int nn3,nn2,jj,j;
         double rep,rem,aip,aim;
 
-        nn3=1+(nn2=2+n+n);
+        nn2=2+n+n;
+        nn3=1+nn2;
         for (j=1,jj=2;j<=n;j++,jj+=2) {
             fft[jj-1][k1]=data[j][k1];
             fft[jj][k1]=data[j][k2];
@@ -1315,17 +1336,5 @@ public class Stats {
         S=null; G=null; ee=null;
 
         return E;
-    }
-
-    public static void main(String[] args) {
-
-        int[] andyScores = new int[] {12,16,19,3,17,1,25,19,17,50,18,1,3,17,2,2,13,18,16,2,25,5,5,1,5,4,17,25,25,50,3,7,17,17,3,3,3,7,11,10,25,1,19,15,4,1,5,12,17,16,50,20,20,20,25,50,2,17,3,20,20,20,5,1,18,15,2,3,25,12,9,3,3,19,16,20,5,5,1,4,15,16,5,20,16,2,25,6,12,25,11,25,7,2,5,19,17,17,2,12,12,9,14,25,25,20,1,20,50,2};
-        int[] ryanScores = new int[] {20,20,5,19,11,25,15,2,7,1,12,1,5,19,3,17,17,2,10,16,17,19,5,20,8,0,17,17,2,15,2,25,60,19,17,2,4,1,5,15,16,7,2,13,5,0,7,19,14,2,11,18,20,19,17,15,11,5,5,4,9,20,1,17,2,0,19,3,2,13,4,4,7,7,3,17,14,12,19,17,17,17,13,15,14,19,3,6,13,18,9,20,9,12,19,18,0,12,17,17,3,5,8,19,3,17,10,15,8,51};
-        int[] jonScores = new int[] {19,1,18,12,12,14,12,5,16,19,19,15,1,6,14,19,3,9,4,17,16,7,16,28,20,20,2,19,3,0,16,5,15,17,17,19,9,18,4,2,19,19,5,1,18,15,17,3,2,2,2,10,3,20,2,15,19,18,20,5,12,12,18,17,11,14,25,5,5,1,19,19,20,25,15,10,16,8,15,3,19,9,4,4,9,17,2,10,11,5,15,9,2,17,17,3,8,18,19,15,4,13,13,4,14,17,2,16,9,5,10,15,17,3,9,17,19,16,16,4,33,8,19,17,4,5,50,9,2,17,3,7,20,20,20,1,19,2,5,18,8,7,3,2,15,15,40,17,3,19};
-        System.out.println(Math.sqrt(Stats.simpleEM(andyScores)));
-        double[] p = Stats.generalEM(andyScores);
-        System.out.println(Math.sqrt(p[0]));
-        System.out.println(Math.sqrt(p[1]));
-        System.out.println(p[2]/Math.sqrt(p[0]*p[1]));
     }
 }
