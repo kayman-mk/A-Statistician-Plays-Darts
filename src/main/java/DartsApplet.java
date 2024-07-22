@@ -6,7 +6,7 @@ import java.awt.image.*;
 import java.util.*;
 import javax.swing.colorchooser.*;
 
-public class DartsApplet extends JApplet implements MouseMotionListener, ChangeListener {
+public class DartsApplet implements MouseMotionListener, ChangeListener {
     private JTextArea textArea;
     private JButton createHeatMapButton;
     private JLabel legendLabel;
@@ -27,7 +27,7 @@ public class DartsApplet extends JApplet implements MouseMotionListener, ChangeL
     private boolean showBoard = true, showOptimum = true;
     private boolean simpleModel = true;
 
-    public void init() {
+    public void init(JFrame window) {
         /////////////////////////////////
         // the west panel
         /////////////////////////////////
@@ -67,7 +67,7 @@ public class DartsApplet extends JApplet implements MouseMotionListener, ChangeL
                     if (r == INVALID_NUMBERS_FAIL) {
                         message += invalidNumbers;
                     }
-                    JOptionPane.showMessageDialog(DartsApplet.this,
+                    JOptionPane.showMessageDialog(window,
                             message, "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
@@ -83,7 +83,7 @@ public class DartsApplet extends JApplet implements MouseMotionListener, ChangeL
         westPanel.add(Box.createVerticalStrut(5));
         westPanel.add(createHeatMapButton);
         westPanel.add(Box.createVerticalStrut(10));
-        add(westPanel, BorderLayout.WEST);
+        window.add(westPanel, BorderLayout.WEST);
 
 
         /////////////////////////////////
@@ -185,7 +185,7 @@ public class DartsApplet extends JApplet implements MouseMotionListener, ChangeL
         mainPanel.add(mouseInfoPanel);
         mainPanel.add(Box.createVerticalGlue());
         mainPanel.add(optionsPanel);
-        add(mainPanel, BorderLayout.CENTER);
+        window.add(mainPanel, BorderLayout.CENTER);
 
         /////////////////////////////////
         // the east panel
@@ -349,7 +349,7 @@ public class DartsApplet extends JApplet implements MouseMotionListener, ChangeL
         eastPanel.add(helpPanel);
         eastPanel.add(statsPanel);
         eastPanel.add(progressPanel);
-        add(eastPanel, BorderLayout.EAST);
+        window.add(eastPanel, BorderLayout.EAST);
     }
 
     // pay attention to the mouse over the heat map
@@ -982,5 +982,22 @@ public class DartsApplet extends JApplet implements MouseMotionListener, ChangeL
     }
 
     public void destroy() {
+    }
+
+    public static void main(String[] args) {
+        Runnable guiCreator = new Runnable() {
+            public void run() {
+                JFrame window = new JFrame("A Statistician Plays Darts");
+                window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+                new DartsApplet().init(window);
+
+                window.setSize(800, 600);
+                window.setVisible(true);
+            }
+        };
+
+        // Führe den obigen Quellcode im Event-Dispatch-Thread aus
+        SwingUtilities.invokeLater(guiCreator);
     }
 }
