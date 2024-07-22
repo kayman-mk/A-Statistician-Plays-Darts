@@ -243,7 +243,7 @@ public class Stats {
         a[0] = 0;
         a[1] = 0;
         a[2] = 0;
-        double big_w = 0;
+        double bigW = 0;
 
         for (int i = 0; i< NUM_IMP_SAMPLES; i++) {
             double[] z = randomPt(x);
@@ -252,12 +252,12 @@ public class Stats {
             a[0] += w*z[0]*z[0];
             a[1] += w*z[1]*z[1];
             a[2] += w*z[0]*z[1];
-            big_w += w;
+            bigW += w;
         }
 
-        a[0] /= big_w;
-        a[1] /= big_w;
-        a[2] /= big_w;
+        a[0] /= bigW;
+        a[1] /= bigW;
+        a[2] /= bigW;
         return a;
     }
 
@@ -417,10 +417,10 @@ public class Stats {
         double c = 2*R/n;
 
         // build the scores array
-        double[][] big_s = new double[2*m+1][2*m+1];
+        double[][] bigS = new double[2*m+1][2*m+1];
         for (int i=1; i<=2*m; i++) {
             for (int j=1; j<=2*m; j++) {
-                big_s[i][j] = score((i-m)*c,(j-m)*c);
+                bigS[i][j] = score((i-m)*c,(j-m)*c);
             }
         }
 
@@ -430,13 +430,13 @@ public class Stats {
 
         // if the variance is 0, just return the scores array!
         if (s == 0) {
-            double[][] E = new double[n][n];
+            double[][] e = new double[n][n];
             for (int i=m-n1+1; i<=m+n2; i++) {
                 for (int j=m-n1+1; j<=m+n2; j++) {
-                    E[i-m+n1-1][j-m+n1-1] = big_s[i][j];
+                    e[i-m+n1-1][j-m+n1-1] = bigS[i][j];
                 }
             }
-            return E;
+            return e;
         }
 
         // build the Gaussian density arrays
@@ -453,9 +453,9 @@ public class Stats {
         twofft(g1,g2,g1f,g2f,2*m);
 
         // compute the FT of each row of S
-        double[][] A = new double[2*m+1][4*m+1];
+        double[][] a = new double[2*m+1][4*m+1];
         for (int i=1; i<=2*m-1; i+=2) {
-            twofftrow(big_s,i,i+1,A,2*m);
+            twofftrow(bigS,i,i+1,a,2*m);
         }
 
         // multiply every row of A by g2f
@@ -463,65 +463,65 @@ public class Stats {
         double im;
         for (int i=1; i<=2*m; i+=1) {
             for (int j=1; j<=4*m-1; j+=2) {
-                re = A[i][j]*g2f[j] - A[i][j+1]*g2f[j+1];
-                im = A[i][j]*g2f[j+1] + A[i][j+1]*g2f[j];
-                A[i][j] = re;
-                A[i][j+1] = im;
+                re = a[i][j]*g2f[j] - a[i][j+1]*g2f[j+1];
+                im = a[i][j]*g2f[j+1] + a[i][j+1]*g2f[j];
+                a[i][j] = re;
+                a[i][j+1] = im;
             }
         }
 
         // compute the inverse FT of every row of A
         for (int i=1; i<=2*m; i++) {
-            four1row(A,i,2*m,-1);
+            four1row(a,i,2*m,-1);
         }
 
         // take the real part of each row, and switch around some columns
-        double[][] AA = new double[2*m+1][2*m+1];
+        double[][] aa = new double[2*m+1][2*m+1];
         for (int i=1; i<=2*m; i++) {
             for (int j=1; j<=m; j++) {
-                AA[i][j+m] = A[i][2*j-1]/(2*m);
+                aa[i][j+m] = a[i][2*j-1]/(2*m);
             }
             for (int j=m+1; j<=2*m; j++) {
-                AA[i][j-m] = A[i][2*j-1]/(2*m);
+                aa[i][j-m] = a[i][2*j-1]/(2*m);
             }
         }
 
         // compute the FT of every column of AA
-        double[][] AAA = new double[4*m+1][2*m+1];
+        double[][] aaa = new double[4*m+1][2*m+1];
         for (int j=1; j<=2*m-1; j+=2) {
-            twofftcol(AA,j,j+1,AAA,2*m);
+            twofftcol(aa,j,j+1,aaa,2*m);
         }
 
         // multiply every column of AAA by g1f
         for (int j=1; j<=2*m; j++) {
             for (int i=1; i<=4*m-1; i+=2) {
-                re = AAA[i][j]*g1f[i] - AAA[i+1][j]*g1f[i+1];
-                im = AAA[i][j]*g1f[i+1] + AAA[i+1][j]*g1f[i];
-                AAA[i][j] = re;
-                AAA[i+1][j] = im;
+                re = aaa[i][j]*g1f[i] - aaa[i+1][j]*g1f[i+1];
+                im = aaa[i][j]*g1f[i+1] + aaa[i+1][j]*g1f[i];
+                aaa[i][j] = re;
+                aaa[i+1][j] = im;
             }
         }
 
         // compute the inverse FT of every column of AAA
         for (int j=1; j<=2*m; j++) {
-            four1col(AAA,j,2*m,-1);
+            four1col(aaa,j,2*m,-1);
         }
 
         // take the real part of each column, switch around some rows,
         // and strip away some part of the array on each side
-        double[][] E = new double[n][n];
+        double[][] e = new double[n][n];
         for (int i=1; i<=n1; i++) {
             for (int j=m-n1+1; j<=m+n2; j++) {
-                E[i+n2-1][j-m+n1-1] = AAA[2*i-1][j]/(2*m);
+                e[i+n2-1][j-m+n1-1] = aaa[2*i-1][j]/(2*m);
             }
         }
         for (int i=2*m-n2+1; i<=2*m; i++) {
             for (int j=m-n1+1; j<=m+n2; j++) {
-                E[i-2*m+n2-1][j-m+n1-1] = AAA[2*i-1][j]/(2*m);
+                e[i-2*m+n2-1][j-m+n1-1] = aaa[2*i-1][j]/(2*m);
             }
         }
 
-        return E;
+        return e;
     }
 
     // Parameters
@@ -557,11 +557,11 @@ public class Stats {
         double c = 2*R/n;
 
         // build the scores array
-        double[][] S = new double[2*m+1][4*m+1];
+        double[][] s = new double[2*m+1][4*m+1];
         for (int i=1; i<=2*m; i++) {
             for (int j=1; j<=2*m; j++) {
-                S[i][2*j-1] = score((i-m)*c,(j-m)*c);
-                S[i][2*j] = 0;
+                s[i][2*j-1] = score((i-m)*c,(j-m)*c);
+                s[i][2*j] = 0;
             }
         }
 
@@ -570,65 +570,65 @@ public class Stats {
         int n2 = (int)Math.ceil(n/2.0);
 
         // build the Gaussian density array
-        double[][] G = new double[2*m+1][4*m+1];
+        double[][] g = new double[2*m+1][4*m+1];
         double det = s1*s2-s3*s3;
         for (int i=1; i<=2*m; i++) {
             for (int j=1; j<=2*m; j++) {
-                G[i][2*j-1] = Math.exp(-(s2*(i-m)*(i-m) -
+                g[i][2*j-1] = Math.exp(-(s2*(i-m)*(i-m) -
                         2*s3*(i-m)*(j-m) +
                         s1*(j-m)*(j-m))*c*c/(2*det))
                         /(2*Math.PI*Math.sqrt(det))*c*c;
-                G[i][2*j] = 0;
+                g[i][2*j] = 0;
             }
         }
 
         // compute the FT of each matrix (in-place)
-        four2(S,2*m,1);
-        four2(G,2*m,1);
+        four2(s,2*m,1);
+        four2(g,2*m,1);
 
         // multiply S and G together (store the result in S)
         double re;
         double im;
         for (int i=1; i<=2*m; i+=1) {
             for (int j=1; j<=4*m-1; j+=2) {
-                re = S[i][j]*G[i][j] - S[i][j+1]*G[i][j+1];
-                im = S[i][j]*G[i][j+1] + S[i][j+1]*G[i][j];
-                S[i][j] = re;
-                S[i][j+1] = im;
+                re = s[i][j]*g[i][j] - s[i][j+1]*g[i][j+1];
+                im = s[i][j]*g[i][j+1] + s[i][j+1]*g[i][j];
+                s[i][j] = re;
+                s[i][j+1] = im;
             }
         }
 
         // compute the inverse FT of S (in-place)
-        four2(S,2*m,-1);
+        four2(s,2*m,-1);
 
         // switch around some rows and some columns, take the real part
-        double[][] EE = new double[2*m+1][2*m+1];
+        double[][] ee = new double[2*m+1][2*m+1];
         for (int i=1; i<=m; i++) {
             for (int j=1; j<=m; j++) {
-                EE[i+m][j+m] = S[i][2*j-1]/(4*m*m);
+                ee[i+m][j+m] = s[i][2*j-1]/(4*m*m);
             }
             for (int j=m+1; j<=2*m; j++) {
-                EE[i+m][j-m] = S[i][2*j-1]/(4*m*m);
+                ee[i+m][j-m] = s[i][2*j-1]/(4*m*m);
             }
         }
         for (int i=m+1; i<=2*m; i++) {
             for (int j=1; j<=m; j++) {
-                EE[i-m][j+m] = S[i][2*j-1]/(4*m*m);
+                ee[i-m][j+m] = s[i][2*j-1]/(4*m*m);
             }
             for (int j=m+1; j<=2*m; j++) {
-                EE[i-m][j-m] = S[i][2*j-1]/(4*m*m);
+                ee[i-m][j-m] = s[i][2*j-1]/(4*m*m);
             }
         }
 
         // trim away on each side
-        double[][] E = new double[n][n];
+        double[][] e = new double[n][n];
         for (int i=m-n1; i<=m+n2-1; i++) {
             for (int j=m-n1; j<=m+n2-1; j++) {
-                E[i-m+n1][j-m+n1] = EE[i][j];
+                e[i-m+n1][j-m+n1] = ee[i][j];
             }
         }
 
-        return E;
+        return e;
     }
 
     public static int score(double x, double y) {
@@ -808,9 +808,20 @@ public class Stats {
 
     // four1 applied to the kth row of data (a matrix)
     private static void four1row(double[][] data, int k, int nn, int isign) {
-        int n,mmax,m,j,istep,i;
-        double wtemp,wr,wpr,wpi,wi,theta;
-        double temp,tempr,tempi;
+        int n;
+        int mmax;
+        int m;
+        int j;
+        int istep;
+        int i;
+        double wtemp;
+        double wr;
+        double wpr;
+        double wpi;
+        double wi;
+        double theta;
+        double tempr;
+        double tempi;
 
         n=nn << 1;
         j=1;
@@ -855,9 +866,20 @@ public class Stats {
 
     // four1 applied to the kth column of data (a matrix)
     private static void four1col(double[][] data, int k, int nn, int isign) {
-        int n,mmax,m,j,istep,i;
-        double wtemp,wr,wpr,wpi,wi,theta;
-        double temp,tempr,tempi;
+        int n;
+        int mmax;
+        int m;
+        int j;
+        int istep;
+        int i;
+        double wtemp;
+        double wr;
+        double wpr;
+        double wpi;
+        double wi;
+        double theta;
+        double tempr;
+        double tempi;
 
         n=nn << 1;
         j=1;
@@ -951,8 +973,14 @@ public class Stats {
     // in the corresponding rows of fft
     private static void twofftrow(double[][] data, int k1, int k2,
                                   double[][] fft, int n) {
-        int nn3,nn2,jj,j;
-        double rep,rem,aip,aim;
+        int nn3;
+        int nn2;
+        int jj;
+        int j;
+        double rep;
+        double rem;
+        double aip;
+        double aim;
 
         nn2=2+n+n;
         nn3=1+nn2;
@@ -983,7 +1011,10 @@ public class Stats {
     // in the corresponding columns of fft
     private static void twofftcol(double[][] data, int k1, int k2,
                                   double[][] fft, int n) {
-        int nn3,nn2,jj,j;
+        int nn3;
+        int nn2;
+        int jj;
+        int j;
         double rep;
         double rem;
         double aip;
@@ -1083,10 +1114,10 @@ public class Stats {
         int inc = numIter/10;
 
         for (int i=0; i<numIter; i++) {
-            double[] A = generalStep(scores, s1, s2, s3);
-            s1 = A[0];
-            s2 = A[1];
-            s3 = A[2];
+            double[] a = generalStep(scores, s1, s2, s3);
+            s1 = a[0];
+            s2 = a[1];
+            s3 = a[2];
             if (i % inc == 0) {
                 da.updateProgress(50*i/numIter);
             }
@@ -1112,10 +1143,10 @@ public class Stats {
         double c = 2*R/n;
 
         // build the scores array
-        double[][] S = new double[2*m+1][2*m+1];
+        double[][] bigS = new double[2*m+1][2*m+1];
         for (int i=1; i<=2*m; i++) {
             for (int j=1; j<=2*m; j++) {
-                S[i][j] = score((i-m)*c,(j-m)*c);
+                bigS[i][j] = score((i-m)*c,(j-m)*c);
             }
         }
         da.updateProgress(50+1/11*50);
@@ -1126,14 +1157,14 @@ public class Stats {
 
         // if the variance is 0, just return the scores array!
         if (s == 0) {
-            double[][] E = new double[n][n];
+            double[][] e = new double[n][n];
             for (int i=m-n1+1; i<=m+n2; i++) {
                 for (int j=m-n1+1; j<=m+n2; j++) {
-                    E[i-m+n1-1][j-m+n1-1] = S[i][j];
+                    e[i-m+n1-1][j-m+n1-1] = bigS[i][j];
                 }
             }
             da.updateProgress(100);
-            return E;
+            return e;
         }
 
         // build the Gaussian density arrays
@@ -1152,9 +1183,9 @@ public class Stats {
         da.updateProgress(50+3/11*50);
 
         // compute the FT of each row of S
-        double[][] A = new double[2*m+1][4*m+1];
+        double[][] a = new double[2*m+1][4*m+1];
         for (int i=1; i<=2*m-1; i+=2) {
-            twofftrow(S,i,i+1,A,2*m);
+            twofftrow(bigS,i,i+1,a,2*m);
         }
         da.updateProgress(50+4/11*50);
 
@@ -1163,76 +1194,72 @@ public class Stats {
         double im;
         for (int i=1; i<=2*m; i+=1) {
             for (int j=1; j<=4*m-1; j+=2) {
-                re = A[i][j]*g2f[j] - A[i][j+1]*g2f[j+1];
-                im = A[i][j]*g2f[j+1] + A[i][j+1]*g2f[j];
-                A[i][j] = re;
-                A[i][j+1] = im;
+                re = a[i][j]*g2f[j] - a[i][j+1]*g2f[j+1];
+                im = a[i][j]*g2f[j+1] + a[i][j+1]*g2f[j];
+                a[i][j] = re;
+                a[i][j+1] = im;
             }
         }
         da.updateProgress(50+5/11*50);
 
         // compute the inverse FT of every row of A
         for (int i=1; i<=2*m; i++) {
-            four1row(A,i,2*m,-1);
+            four1row(a,i,2*m,-1);
         }
         da.updateProgress(50+6/11*50);
 
         // take the real part of each row, and switch around some columns
-        double[][] AA = new double[2*m+1][2*m+1];
+        double[][] aa = new double[2*m+1][2*m+1];
         for (int i=1; i<=2*m; i++) {
             for (int j=1; j<=m; j++) {
-                AA[i][j+m] = A[i][2*j-1]/(2*m);
+                aa[i][j+m] = a[i][2*j-1]/(2*m);
             }
             for (int j=m+1; j<=2*m; j++) {
-                AA[i][j-m] = A[i][2*j-1]/(2*m);
+                aa[i][j-m] = a[i][2*j-1]/(2*m);
             }
         }
         da.updateProgress(50+7/11*50);
 
         // compute the FT of every column of AA
-        double[][] AAA = new double[4*m+1][2*m+1];
+        double[][] aaa = new double[4*m+1][2*m+1];
         for (int j=1; j<=2*m-1; j+=2) {
-            twofftcol(AA,j,j+1,AAA,2*m);
+            twofftcol(aa,j,j+1,aaa,2*m);
         }
         da.updateProgress(50+8/11*50);
 
         // multiply every column of AAA by g1f
         for (int j=1; j<=2*m; j++) {
             for (int i=1; i<=4*m-1; i+=2) {
-                re = AAA[i][j]*g1f[i] - AAA[i+1][j]*g1f[i+1];
-                im = AAA[i][j]*g1f[i+1] + AAA[i+1][j]*g1f[i];
-                AAA[i][j] = re;
-                AAA[i+1][j] = im;
+                re = aaa[i][j]*g1f[i] - aaa[i+1][j]*g1f[i+1];
+                im = aaa[i][j]*g1f[i+1] + aaa[i+1][j]*g1f[i];
+                aaa[i][j] = re;
+                aaa[i+1][j] = im;
             }
         }
         da.updateProgress(50+9/11*50);
 
         // compute the inverse FT of every column of AAA
         for (int j=1; j<=2*m; j++) {
-            four1col(AAA,j,2*m,-1);
+            four1col(aaa,j,2*m,-1);
         }
         da.updateProgress(50+10/11*50);
 
         // take the real part of each column, switch around some rows,
         // and strip away some part of the array on each side
-        double[][] E = new double[n][n];
+        double[][] e = new double[n][n];
         for (int i=1; i<=n1; i++) {
             for (int j=m-n1+1; j<=m+n2; j++) {
-                E[i+n2-1][j-m+n1-1] = AAA[2*i-1][j]/(2*m);
+                e[i+n2-1][j-m+n1-1] = aaa[2*i-1][j]/(2*m);
             }
         }
         for (int i=2*m-n2+1; i<=2*m; i++) {
             for (int j=m-n1+1; j<=m+n2; j++) {
-                E[i-2*m+n2-1][j-m+n1-1] = AAA[2*i-1][j]/(2*m);
+                e[i-2*m+n2-1][j-m+n1-1] = aaa[2*i-1][j]/(2*m);
             }
         }
         da.updateProgress(100);
 
-        // help the gc out
-        S=null; g1=null; g2=null; g1f=null; g2f=null;
-        A=null; AA=null; AAA=null;
-
-        return E;
+        return e;
     }
 
     public static double[][] computeExpScores(double s1, double s2, double s3,
@@ -1258,11 +1285,11 @@ public class Stats {
         double c = 2*R/n;
 
         // build the scores array
-        double[][] S = new double[2*m+1][4*m+1];
+        double[][] s = new double[2*m+1][4*m+1];
         for (int i=1; i<=2*m; i++) {
             for (int j=1; j<=2*m; j++) {
-                S[i][2*j-1] = score((i-m)*c,(j-m)*c);
-                S[i][2*j] = 0;
+                s[i][2*j-1] = score((i-m)*c,(j-m)*c);
+                s[i][2*j] = 0;
             }
         }
         da.updateProgress(50+1/7*50);
@@ -1272,24 +1299,24 @@ public class Stats {
         int n2 = (int)Math.ceil(n/2.0);
 
         // build the Gaussian density array
-        double[][] G = new double[2*m+1][4*m+1];
+        double[][] g = new double[2*m+1][4*m+1];
         double det = s1*s2-s3*s3;
         for (int i=1; i<=2*m; i++) {
             for (int j=1; j<=2*m; j++) {
-                G[i][2*j-1] = Math.exp(-(s2*(i-m)*(i-m) -
+                g[i][2*j-1] = Math.exp(-(s2*(i-m)*(i-m) -
                         2*s3*(i-m)*(j-m) +
                         s1*(j-m)*(j-m))*c*c/(2*det))
                         /(2*Math.PI*Math.sqrt(det))*c*c;
-                G[i][2*j] = 0;
+                g[i][2*j] = 0;
             }
         }
         da.updateProgress(50+2/7*50);
 
         // compute the FT of each matrix (in-place)
-        four2(S,2*m,1);
+        four2(s,2*m,1);
         da.updateProgress(50+3/7*50);
 
-        four2(G,2*m,1);
+        four2(g,2*m,1);
         da.updateProgress(50+4/7*50);
 
         // multiply S and G together (store the result in S)
@@ -1297,49 +1324,46 @@ public class Stats {
         double im;
         for (int i=1; i<=2*m; i+=1) {
             for (int j=1; j<=4*m-1; j+=2) {
-                re = S[i][j]*G[i][j] - S[i][j+1]*G[i][j+1];
-                im = S[i][j]*G[i][j+1] + S[i][j+1]*G[i][j];
-                S[i][j] = re;
-                S[i][j+1] = im;
+                re = s[i][j]*g[i][j] - s[i][j+1]*g[i][j+1];
+                im = s[i][j]*g[i][j+1] + s[i][j+1]*g[i][j];
+                s[i][j] = re;
+                s[i][j+1] = im;
             }
         }
         da.updateProgress(50+5/7*50);
 
         // compute the inverse FT of S (in-place)
-        four2(S,2*m,-1);
+        four2(s,2*m,-1);
         da.updateProgress(50+6/7*50);
 
         // switch around some rows and some columns, take the real part
         double[][] ee = new double[2*m+1][2*m+1];
         for (int i=1; i<=m; i++) {
             for (int j=1; j<=m; j++) {
-                ee[i+m][j+m] = S[i][2*j-1]/(4*m*m);
+                ee[i+m][j+m] = s[i][2*j-1]/(4*m*m);
             }
             for (int j=m+1; j<=2*m; j++) {
-                ee[i+m][j-m] = S[i][2*j-1]/(4*m*m);
+                ee[i+m][j-m] = s[i][2*j-1]/(4*m*m);
             }
         }
         for (int i=m+1; i<=2*m; i++) {
             for (int j=1; j<=m; j++) {
-                ee[i-m][j+m] = S[i][2*j-1]/(4*m*m);
+                ee[i-m][j+m] = s[i][2*j-1]/(4*m*m);
             }
             for (int j=m+1; j<=2*m; j++) {
-                ee[i-m][j-m] = S[i][2*j-1]/(4*m*m);
+                ee[i-m][j-m] = s[i][2*j-1]/(4*m*m);
             }
         }
 
         // trim away on each side
-        double[][] E = new double[n][n];
+        double[][] e = new double[n][n];
         for (int i=m-n1; i<=m+n2-1; i++) {
             for (int j=m-n1; j<=m+n2-1; j++) {
-                E[i-m+n1][j-m+n1] = ee[i][j];
+                e[i-m+n1][j-m+n1] = ee[i][j];
             }
         }
         da.updateProgress(100);
 
-        // help the gc out
-        S=null; G=null; ee=null;
-
-        return E;
+        return e;
     }
 }
