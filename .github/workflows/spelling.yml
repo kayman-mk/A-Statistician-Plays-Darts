@@ -3,7 +3,7 @@ name: "Check spelling"
 
 # yamllint disable-line rule:truthy
 on:
- pull_request:
+  pull_request:
 
 jobs:
   cspell:

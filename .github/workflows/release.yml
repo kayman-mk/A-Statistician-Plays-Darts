@@ -3,9 +3,9 @@ name: Release
 
 # yamllint disable-line rule:truthy
 on:
- push:
-   branches:
-     - main
+  push:
+    branches:
+      - main
 
 jobs:
   release:
